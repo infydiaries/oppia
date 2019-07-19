@@ -1,3 +1,5 @@
+import { debug } from "util";
+
 // Copyright 2014 The Oppia Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,23 +18,30 @@
  * @fileoverview Validator service for the fraction interaction.
  */
 
-require('domain/objects/FractionObjectFactory.ts');
-require('interactions/baseInteractionValidationService.ts');
+require("domain/objects/FractionObjectFactory.ts");
+require("interactions/baseInteractionValidationService.ts");
 
-var oppia = require('AppInit.ts').module;
+var oppia = require("AppInit.ts").module;
 
-oppia.factory('FractionInputValidationService', [
-  'FractionObjectFactory', 'baseInteractionValidationService',
-  'WARNING_TYPES',
+oppia.factory("FractionInputValidationService", [
+  "FractionObjectFactory",
+  "baseInteractionValidationService",
+  "WARNING_TYPES",
   function(
-      FractionObjectFactory, baseInteractionValidationService, WARNING_TYPES) {
+    FractionObjectFactory,
+    baseInteractionValidationService,
+    WARNING_TYPES
+  ) {
     var getNonIntegerInputWarning = function(i, j) {
       return {
         type: WARNING_TYPES.ERROR,
-        message: (
-          'Rule ' + (j + 1) + ' from answer group ' +
-          (i + 1) + ' is invalid: input should be an ' +
-          'integer.')
+        message:
+          "Rule " +
+          (j + 1) +
+          " from answer group " +
+          (i + 1) +
+          " is invalid: input should be an " +
+          "integer."
       };
     };
     return {
@@ -40,17 +49,22 @@ oppia.factory('FractionInputValidationService', [
         return [];
       },
       getAllWarnings: function(
-          stateName, customizationArgs, answerGroups, defaultOutcome) {
+        stateName,
+        customizationArgs,
+        answerGroups,
+        defaultOutcome
+      ) {
         var warningsList = [];
         var shouldBeInSimplestForm =
           customizationArgs.requireSimplestForm.value;
         var allowImproperFraction =
-            customizationArgs.allowImproperFraction.value;
+          customizationArgs.allowImproperFraction.value;
         var allowNonzeroIntegerPart =
           customizationArgs.allowNonzeroIntegerPart.value;
 
         warningsList = warningsList.concat(
-          this.getCustomizationArgsWarnings(customizationArgs));
+          this.getCustomizationArgsWarnings(customizationArgs)
+        );
 
         var toFloat = function(fraction) {
           return FractionObjectFactory.fromDict(fraction).toFloat();
@@ -72,28 +86,32 @@ oppia.factory('FractionInputValidationService', [
           range.ubi = ubi;
         };
         var isEnclosedBy = function(ra, rb) {
-          if ((ra.lb === null && ra.ub === null) ||
-            (rb.lb === null && rb.ub === null)) {
+          if (
+            (ra.lb === null && ra.ub === null) ||
+            (rb.lb === null && rb.ub === null)
+          ) {
             return false;
           }
 
           // Checks if range ra is enclosed by range rb.
           var lowerBoundConditionIsSatisfied =
-            (rb.lb < ra.lb) || (rb.lb === ra.lb && (!ra.lbi || rb.lbi));
+            rb.lb < ra.lb || (rb.lb === ra.lb && (!ra.lbi || rb.lbi));
           var upperBoundConditionIsSatisfied =
-            (rb.ub > ra.ub) || (rb.ub === ra.ub && (!ra.ubi || rb.ubi));
-          return lowerBoundConditionIsSatisfied &&
-            upperBoundConditionIsSatisfied;
+            rb.ub > ra.ub || (rb.ub === ra.ub && (!ra.ubi || rb.ubi));
+          return (
+            lowerBoundConditionIsSatisfied && upperBoundConditionIsSatisfied
+          );
         };
 
         var shouldCheckRangeCriteria = function(earlierRule, laterRule) {
           if (
-            (earlierRule.type === 'IsExactlyEqualTo' &&
-            laterRule.type === 'IsExactlyEqualTo') ||
-            (earlierRule.type === 'IsExactlyEqualTo' &&
-            laterRule.type === 'IsEquivalentTo') ||
-            (earlierRule.type === 'IsExactlyEqualTo' &&
-            laterRule.type === 'IsEquivalentToAndInSimplestForm')) {
+            (earlierRule.type === "IsExactlyEqualTo" &&
+              laterRule.type === "IsExactlyEqualTo") ||
+            (earlierRule.type === "IsExactlyEqualTo" &&
+              laterRule.type === "IsEquivalentTo") ||
+            (earlierRule.type === "IsExactlyEqualTo" &&
+              laterRule.type === "IsEquivalentToAndInSimplestForm")
+          ) {
             return false;
           }
           return true;
@@ -112,29 +130,31 @@ oppia.factory('FractionInputValidationService', [
               lb: null,
               ub: null,
               lbi: false,
-              ubi: false,
+              ubi: false
             };
 
             var matchedDenominator = {
               answerGroupIndex: i + 1,
               ruleIndex: j + 1,
-              denominator: null,
+              denominator: null
             };
-
             switch (rule.type) {
-              case 'IsExactlyEqualTo':
+              case "IsExactlyEqualTo":
                 if (shouldBeInSimplestForm) {
                   var fraction = rule.inputs.f;
                   var fractionInSimplestForm = FractionObjectFactory.fromDict(
-                    fraction).convertToSimplestForm();
+                    fraction
+                  ).convertToSimplestForm();
                   if (!angular.equals(fraction, fractionInSimplestForm)) {
                     warningsList.push({
                       type: WARNING_TYPES.ERROR,
-                      message: (
-                        'Rule ' + (j + 1) + ' from answer group ' +
+                      message:
+                        "Rule " +
+                        (j + 1) +
+                        " from answer group " +
                         (i + 1) +
-                        ' will never be matched because it is not ' +
-                        'in simplest form.')
+                        " will never be matched because it is not " +
+                        "in simplest form."
                     });
                   }
                 }
@@ -143,11 +163,13 @@ oppia.factory('FractionInputValidationService', [
                   if (fraction.isImproperFraction()) {
                     warningsList.push({
                       type: WARNING_TYPES.ERROR,
-                      message: (
-                        'Rule ' + (j + 1) + ' from answer group ' +
+                      message:
+                        "Rule " +
+                        (j + 1) +
+                        " from answer group " +
                         (i + 1) +
-                        ' will never be matched because it is an ' +
-                        'improper fraction')
+                        " will never be matched because it is an " +
+                        "improper fraction"
                     });
                   }
                 }
@@ -156,82 +178,97 @@ oppia.factory('FractionInputValidationService', [
                   if (fraction.hasNonzeroIntegerPart()) {
                     warningsList.push({
                       type: WARNING_TYPES.ERROR,
-                      message: (
-                        'Rule ' + (j + 1) + ' from answer group ' +
+                      message:
+                        "Rule " +
+                        (j + 1) +
+                        " from answer group " +
                         (i + 1) +
-                        ' will never be matched because it has a ' +
-                        'non zero integer part')
+                        " will never be matched because it has a " +
+                        "non zero integer part"
                     });
                   }
                 }
                 var f = toFloat(rule.inputs.f);
                 setLowerAndUpperBounds(range, f, f, true, true);
                 break;
-              case 'IsEquivalentTo': // fall-through
-              case 'IsEquivalentToAndInSimplestForm':
+              case "IsDoubleTo":
+                var f = toFloat(rule.inputs.f);
+                setLowerAndUpperBounds(range, 2 * f, 2 * f, true, true);
+                break;
+              case "IsEquivalentTo": // fall-through
+              case "IsEquivalentToAndInSimplestForm":
                 var f = toFloat(rule.inputs.f);
                 setLowerAndUpperBounds(range, f, f, true, true);
                 break;
-              case 'IsGreaterThan':
+              case "IsGreaterThan":
                 var f = toFloat(rule.inputs.f);
                 setLowerAndUpperBounds(range, f, Infinity, false, false);
                 break;
-              case 'IsLessThan':
+              case "IsLessThan":
                 var f = toFloat(rule.inputs.f);
                 setLowerAndUpperBounds(range, -Infinity, f, false, false);
                 break;
-              case 'HasNumeratorEqualTo':
+              case "HasNumeratorEqualTo":
                 if (!Number.isInteger(rule.inputs.x)) {
                   warningsList.push(getNonIntegerInputWarning(i, j));
                 }
                 break;
-              case 'HasIntegerPartEqualTo':
+              case "HasIntegerPartEqualTo":
                 if (!allowNonzeroIntegerPart && rule.inputs.x !== 0) {
                   warningsList.push({
                     type: WARNING_TYPES.ERROR,
-                    message: (
-                      'Rule ' + (j + 1) + ' from answer group ' +
+                    message:
+                      "Rule " +
+                      (j + 1) +
+                      " from answer group " +
                       (i + 1) +
-                      ' will never be matched because integer part ' +
-                      'has to be zero')
+                      " will never be matched because integer part " +
+                      "has to be zero"
                   });
                 }
                 if (!Number.isInteger(rule.inputs.x)) {
                   warningsList.push(getNonIntegerInputWarning(i, j));
                 }
                 break;
-              case 'HasDenominatorEqualTo':
+              case "HasDenominatorEqualTo":
                 if (!Number.isInteger(rule.inputs.x)) {
                   warningsList.push(getNonIntegerInputWarning(i, j));
                 }
                 if (rule.inputs.x === 0) {
                   warningsList.push({
                     type: WARNING_TYPES.ERROR,
-                    message: (
-                      'Rule ' + (j + 1) + ' from answer group ' +
-                      (i + 1) + ' is invalid: denominator ' +
-                      'should be greater than zero.')
+                    message:
+                      "Rule " +
+                      (j + 1) +
+                      " from answer group " +
+                      (i + 1) +
+                      " is invalid: denominator " +
+                      "should be greater than zero."
                   });
                 }
                 matchedDenominator.denominator = rule.inputs.x;
                 break;
-              case 'HasFractionalPartExactlyEqualTo':
+              case "HasFractionalPartExactlyEqualTo":
                 if (rule.inputs.f.wholeNumber !== 0) {
                   warningsList.push({
                     type: WARNING_TYPES.ERROR,
-                    message: (
-                      'Rule ' + (j + 1) + ' from answer group ' +
+                    message:
+                      "Rule " +
+                      (j + 1) +
+                      " from answer group " +
                       (i + 1) +
-                      ' is invalid as integer part should be zero')
+                      " is invalid as integer part should be zero"
                   });
                 }
                 if (rule.inputs.f.isNegative !== false) {
                   warningsList.push({
                     type: WARNING_TYPES.ERROR,
-                    message: (
-                      'Rule ' + (j + 1) + ' from answer group ' +
+                    message:
+                      "Rule " +
+                      (j + 1) +
+                      " from answer group " +
                       (i + 1) +
-                      ' is invalid as sign should be positive')
+                      " is invalid as sign should be positive"
                   });
                 }
                 if (!allowImproperFraction) {
@@ -239,10 +276,12 @@ oppia.factory('FractionInputValidationService', [
                   if (fraction.isImproperFraction()) {
                     warningsList.push({
                       type: WARNING_TYPES.ERROR,
-                      message: (
-                        'Rule ' + (j + 1) + ' from answer group ' +
+                      message:
+                        "Rule " +
+                        (j + 1) +
+                        " from answer group " +
                         (i + 1) +
-                        ' is invalid as improper fractions are not allowed')
+                        " is invalid as improper fractions are not allowed"
                     });
                   }
                 }
@@ -252,36 +291,51 @@ oppia.factory('FractionInputValidationService', [
             }
             for (var k = 0; k < ranges.length; k++) {
               if (isEnclosedBy(range, ranges[k])) {
-                var earlierRule = answerGroups[ranges[k].answerGroupIndex - 1]
-                  .rules[ranges[k].ruleIndex - 1];
+                var earlierRule =
+                  answerGroups[ranges[k].answerGroupIndex - 1].rules[
+                    ranges[k].ruleIndex - 1
+                  ];
                 if (shouldCheckRangeCriteria(earlierRule, rule)) {
                   warningsList.push({
                     type: WARNING_TYPES.ERROR,
-                    message: (
-                      'Rule ' + (j + 1) + ' from answer group ' +
-                      (i + 1) + ' will never be matched because it ' +
-                      'is made redundant by rule ' + ranges[k].ruleIndex +
-                      ' from answer group ' + ranges[k].answerGroupIndex +
-                      '.')
+                    message:
+                      "Rule " +
+                      (j + 1) +
+                      " from answer group " +
+                      (i + 1) +
+                      " will never be matched because it " +
+                      "is made redundant by rule " +
+                      ranges[k].ruleIndex +
+                      " from answer group " +
+                      ranges[k].answerGroupIndex +
+                      "."
                   });
                 }
               }
             }
 
             for (var k = 0; k < matchedDenominators.length; k++) {
-              if (matchedDenominators[k].denominator !== null &&
-                rule.type === 'HasFractionalPartExactlyEqualTo') {
-                if (matchedDenominators[k].denominator ===
-                  rule.inputs.f.denominator) {
+              if (
+                matchedDenominators[k].denominator !== null &&
+                rule.type === "HasFractionalPartExactlyEqualTo"
+              ) {
+                if (
+                  matchedDenominators[k].denominator ===
+                  rule.inputs.f.denominator
+                ) {
                   warningsList.push({
                     type: WARNING_TYPES.ERROR,
-                    message: (
-                      'Rule ' + (j + 1) + ' from answer group ' +
-                      (i + 1) + ' will never be matched because it ' +
-                      'is made redundant by rule ' +
+                    message:
+                      "Rule " +
+                      (j + 1) +
+                      " from answer group " +
+                      (i + 1) +
+                      " will never be matched because it " +
+                      "is made redundant by rule " +
                       matchedDenominators[k].ruleIndex +
-                      ' from answer group ' +
-                      matchedDenominators[k].answerGroupIndex + '.')
+                      " from answer group " +
+                      matchedDenominators[k].answerGroupIndex +
+                      "."
                   });
                 }
               }
@@ -294,7 +348,11 @@ oppia.factory('FractionInputValidationService', [
 
         warningsList = warningsList.concat(
           baseInteractionValidationService.getAllOutcomeWarnings(
-            answerGroups, defaultOutcome, stateName));
+            answerGroups,
+            defaultOutcome,
+            stateName
+          )
+        );
 
         return warningsList;
       }
