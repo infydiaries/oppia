@@ -25,7 +25,7 @@ oppia.factory('FractionInputRulesService', [
   function(FractionObjectFactory) {
     var toFloat = function(fractionDict) {
       return FractionObjectFactory.fromDict(fractionDict).toFloat();
-    };
+    };   
 
     return {
       IsEquivalentTo: function(answer, inputs) {
@@ -40,6 +40,10 @@ oppia.factory('FractionInputRulesService', [
       IsExactlyEqualTo: function(answer, inputs) {
         // Only returns true if both answers are structurally equal.
         return angular.equals(answer, inputs.f);
+      },
+      IsDoubleTo : function(answer, inputs) {
+        // Only returns true if input is twice the answer.
+        return angular.equals(toFloat(answer) , 2 * toFloat(inputs.f));
       },
       IsLessThan: function(answer, inputs) {
         return toFloat(answer) < toFloat(inputs.f);
